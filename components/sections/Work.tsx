@@ -1,4 +1,3 @@
-// components/sections/Work.tsx
 import { portfolioData } from "@/lib/data";
 import ProjectCard from "@/components/ui/ProjectCard";
 
