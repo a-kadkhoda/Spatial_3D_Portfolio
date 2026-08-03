@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #05060c;
+  --color-text: #f2f5ff;
+  --color-text-muted: #e8eaf2;
+  --color-accent: #ff6b4d;
+  --color-accent2: #ffb36b; /* renamed from accent-soft */
+
+  --font-sans: var(--font-sora);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans), sans-serif;
+}
