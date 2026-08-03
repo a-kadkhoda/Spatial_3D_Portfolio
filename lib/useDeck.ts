@@ -19,6 +19,9 @@ export function useDeck(screenCount: number) {
   const isLocked = useRef(false);
   const LOCK_MS = 900;
   const touchStartY = useRef(0);
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function goTo(target: number) {
     if (isLocked.current) return;
@@ -37,6 +40,8 @@ export function useDeck(screenCount: number) {
   }
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
+
     function onWheel(e: WheelEvent) {
       if (isEditableTarget(e.target)) return;
 
@@ -55,9 +60,11 @@ export function useDeck(screenCount: number) {
     return () => {
       window.removeEventListener("wheel", onWheel);
     };
-  }, [index]);
+  }, [index, prefersReducedMotion]);
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
+
     function onKeyDown(e: KeyboardEvent) {
       if (isEditableTarget(e.target)) return;
 
@@ -77,9 +84,11 @@ export function useDeck(screenCount: number) {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [index]);
+  }, [index, prefersReducedMotion]);
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
+
     function onTouchStart(e: TouchEvent) {
       touchStartY.current = e.touches[0].clientY;
     }
@@ -104,7 +113,7 @@ export function useDeck(screenCount: number) {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [index]);
+  }, [index, prefersReducedMotion]);
 
   return { index, goTo };
 }
