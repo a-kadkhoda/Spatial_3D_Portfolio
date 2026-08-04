@@ -7,7 +7,7 @@ export default function Work() {
   return (
     <section
       id="work"
-      className="min-h-screen flex flex-col justify-center px-8 md:px-16"
+      className="h-full flex flex-col justify-center px-8 md:px-16"
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">

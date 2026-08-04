@@ -14,7 +14,7 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="min-h-screen flex flex-col items-center justify-center text-center px-8"
+      className="h-full flex flex-col items-center justify-center text-center px-8"
     >
       <p className="font-mono text-xs tracking-[3px] text-accent mb-5">
         06 — CONTACT

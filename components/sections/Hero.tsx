@@ -7,7 +7,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="min-h-screen flex flex-col items-center justify-center text-center px-8"
+      className="h-full flex flex-col items-center justify-center text-center px-8"
     >
       <p className="font-mono text-xs tracking-[3px] text-accent mb-6">
         {kicker}
