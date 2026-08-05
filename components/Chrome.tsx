@@ -4,9 +4,15 @@ interface ChromeProps {
   index: number;
   goTo: (target: number) => void;
   labels: string[];
+  hijackDisabled: boolean;
 }
 
-export default function Chrome({ index, goTo, labels }: ChromeProps) {
+export default function Chrome({
+  index,
+  goTo,
+  labels,
+  hijackDisabled,
+}: ChromeProps) {
   return (
     <>
       <div
@@ -69,7 +75,15 @@ export default function Chrome({ index, goTo, labels }: ChromeProps) {
           return (
             <button
               key={label}
-              onClick={() => goTo(i)}
+              onClick={() => {
+                if (hijackDisabled) {
+                  document
+                    .getElementById(`screen-${index}`)
+                    ?.scrollIntoView({ behavior: "smooth" });
+                } else {
+                  goTo(i);
+                }
+              }}
               className={`flex items-center gap-2.5 font-mono text-[11px] tracking-[2px] ${isActive ? "text-accent" : "text-text-muted"}`}
             >
               <span

@@ -22,11 +22,34 @@ const screens = [
 ];
 
 export default function Deck() {
-  const { index, goTo } = useDeck(screens.length);
+  const { index, goTo, hijackDisabled } = useDeck(screens.length);
+
+  if (hijackDisabled) {
+    return (
+      <div>
+        <Chrome
+          goTo={goTo}
+          index={index}
+          labels={screens.map((s) => s.label)}
+          hijackDisabled={hijackDisabled}
+        />
+        {screens.map(({ screen: Screen }, i) => (
+          <div key={i} id={`screen-${i}`}>
+            <Screen />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
-      <Chrome goTo={goTo} index={index} labels={screens.map((s) => s.label)} />
+      <Chrome
+        goTo={goTo}
+        index={index}
+        labels={screens.map((s) => s.label)}
+        hijackDisabled={hijackDisabled}
+      />
       <div
         style={{
           position: "absolute",
