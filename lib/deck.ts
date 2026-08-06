@@ -48,8 +48,10 @@ export function screenOpacity(screenIndex: number, activeIndex: number): number 
   return distance === 0 ? 1 : distance === 1 ? 0.04 : distance === 2 ? 0.02 : 0;
 }
 
+// The active screen gets no filter at all rather than blur(0px) — a zero-radius blur
+// still promotes the layer and routes its text through the filter pipeline.
 export function screenBlur(screenIndex: number, activeIndex: number): string {
-  return screenIndex === activeIndex ? "blur(0px)" : "blur(2px)";
+  return screenIndex === activeIndex ? "none" : "blur(2px)";
 }
 
 export function initialScreenStyle(

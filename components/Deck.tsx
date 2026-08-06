@@ -23,7 +23,10 @@ import type { ScreenProps } from "@/lib/deck";
 import {
   DECK_DURATION,
   DECK_EASE,
+  EXIT_DURATION,
   FADE_DURATION,
+  RETURN_DELAY,
+  RETURN_DURATION,
   gsap,
   useGSAP,
 } from "@/lib/gsap";
@@ -55,12 +58,16 @@ export default function Deck() {
   const stageRef = useRef<HTMLDivElement>(null);
   const screenRefs = useRef<(HTMLElement | null)[]>([]);
   const hasTravelled = useRef(false);
+  const previousIndex = useRef(index);
   const [initialIndex] = useState(index);
 
   useGSAP(
     () => {
       const stage = stageRef.current;
       if (scrollMode || !stage) return;
+
+      const previous = previousIndex.current;
+      previousIndex.current = index;
 
       const animate = hasTravelled.current && !prefersReducedMotion;
       hasTravelled.current = true;
@@ -75,12 +82,36 @@ export default function Deck() {
 
       screenRefs.current.forEach((screen, i) => {
         if (!screen) return;
+
+        // The blur is snapped, never tweened. Animating a filter on a screen that is
+        // simultaneously scaling past the camera re-rasterises the whole layer, text
+        // included, on every frame — that is the cost, not the transform.
+        gsap.set(screen, { filter: screenBlur(i, index) });
+
+        const autoAlpha = screenOpacity(i, index);
+        if (!animate) {
+          gsap.set(screen, { autoAlpha });
+          return;
+        }
+
+        // Screens with a lower index than the active one are parked between the camera
+        // and the stage, so travel drags them through the perspective origin at runaway
+        // scale. Drop them before they blow up; bring them back once they have shrunk.
+        const wasNearCamera = i < previous;
+        const isNearCamera = i < index;
+
         gsap.to(screen, {
-          autoAlpha: screenOpacity(i, index),
-          filter: screenBlur(i, index),
-          duration: animate ? FADE_DURATION : 0,
+          autoAlpha,
+          duration: isNearCamera
+            ? EXIT_DURATION
+            : wasNearCamera
+              ? RETURN_DURATION
+              : FADE_DURATION,
+          delay: wasNearCamera && !isNearCamera ? RETURN_DELAY : 0,
           ease: "power2.out",
-          overwrite: "auto",
+          // Not "auto": a delayed tween has not rendered yet, so an auto-overwriting
+          // successor would leave it queued and let it win after the fact.
+          overwrite: true,
         });
       });
     },
