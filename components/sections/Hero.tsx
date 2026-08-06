@@ -9,7 +9,7 @@ export default function Hero() {
       id="hero"
       className="h-full flex flex-col items-center justify-center text-center px-8 overflow-y-auto no-scrollbar"
     >
-      <p className="font-mono text-xs tracking-[3px] text-accent mb-6">
+      <p className="font-mono text-xs tracking-[1.5px] md:tracking-[3px] text-accent mb-6">
         {kicker}
       </p>
       <h1 className="font-display text-6xl md:text-8xl font-semibold tracking-tight leading-none">
@@ -20,11 +20,11 @@ export default function Hero() {
         </span>
       </h1>
       <p className="max-w-lg mt-7 text-lg text-text-muted">{bio}</p>
-      <div className="flex gap-3.5 mt-9">
-        <button className="font-display font-semibold text-sm bg-accent text-bg px-7 py-3.5 rounded-full">
+      <div className="flex gap-3 md:gap-3.5 mt-9">
+        <button className="font-display font-semibold text-xs md:text-sm bg-accent text-bg px-5 md:px-7 py-3 md:py-3.5 rounded-full whitespace-nowrap">
           Explore work →
         </button>
-        <button className="font-display font-medium text-sm bg-white/5 border border-white/15 px-7 py-3.5 rounded-full">
+        <button className="font-display font-medium text-xs md:text-sm bg-white/5 border border-white/15 px-5 md:px-7 py-3 md:py-3.5 rounded-full whitespace-nowrap">
           Get in touch
         </button>
       </div>

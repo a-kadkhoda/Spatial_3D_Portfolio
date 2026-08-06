@@ -53,7 +53,7 @@ export default function Chrome({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "22px 32px",
+          padding: "calc(22px + env(safe-area-inset-top)) 32px 22px",
         }}
       >
         <button
