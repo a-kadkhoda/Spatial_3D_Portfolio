@@ -60,11 +60,17 @@ export default function Deck() {
           labels={screens.map((s) => s.label)}
           hijackDisabled={hijackDisabled}
         />
-        {screens.map(({ screen: Screen }, i) => (
+        {screens.map(({ screen: Screen, label }, i) => (
           <div
             key={i}
             id={`screen-${i}`}
-            style={{ padding: "96px 20px 110px", height: "100vh" }}
+            style={{
+              padding: "96px 20px 110px",
+              height:
+                label === "00 HOME" || label === "06 CONTACT"
+                  ? "100vh"
+                  : "auto",
+            }}
           >
             <Screen />
           </div>
