@@ -1,114 +1,265 @@
 "use client";
 
-import { useDeck } from "@/lib/useDeck";
-import Hero from "@/components/sections/Hero";
-import About from "@/components/sections/About";
-import Work from "@/components/sections/Work";
-import Stack from "@/components/sections/Stack";
-import Experience from "@/components/sections/Experience";
-import Writing from "@/components/sections/Writing";
-import Contact from "@/components/sections/Contact";
-import { getScreenStyle } from "@/lib/screenStyle";
-import Chrome from "./Chrome";
-import { useEffect } from "react";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ComponentType } from "react";
 
-const screens = [
-  { screen: Hero, label: "00 HOME" },
-  { screen: Work, label: "01 WORK" },
-  { screen: Stack, label: "02 STACK" },
-  { screen: Experience, label: "03 EXPERIENCE" },
-  { screen: About, label: "04 ABOUT" },
-  { screen: Writing, label: "05 WRITING" },
-  { screen: Contact, label: "06 CONTACT" },
+import Chrome from "@/components/Chrome";
+import About from "@/components/sections/About";
+import Contact from "@/components/sections/Contact";
+import Experience from "@/components/sections/Experience";
+import Hero from "@/components/sections/Hero";
+import Stack from "@/components/sections/Stack";
+import Work from "@/components/sections/Work";
+import Writing from "@/components/sections/Writing";
+import {
+  SCREEN_IDS,
+  initialScreenStyle,
+  screenBlur,
+  screenOpacity,
+  stageOffset,
+} from "@/lib/deck";
+import type { ScreenProps } from "@/lib/deck";
+import {
+  DECK_DURATION,
+  DECK_EASE,
+  FADE_DURATION,
+  gsap,
+  useGSAP,
+} from "@/lib/gsap";
+import { readHashIndex, useDeck } from "@/lib/useDeck";
+
+const Scene = dynamic(() => import("@/scene/Scene"), { ssr: false });
+
+const SCREENS: { component: ComponentType<ScreenProps>; label: string }[] = [
+  { component: Hero, label: "00 HOME" },
+  { component: Work, label: "01 WORK" },
+  { component: Stack, label: "02 STACK" },
+  { component: Experience, label: "03 EXPERIENCE" },
+  { component: About, label: "04 ABOUT" },
+  { component: Writing, label: "05 WRITING" },
+  { component: Contact, label: "06 CONTACT" },
 ];
 
+const FULL_HEIGHT_IN_SCROLL = new Set(["home", "contact"]);
+
+const LABELS = SCREENS.map((s) => s.label);
+
 export default function Deck() {
-  const { index, goTo, hijackDisabled, setIndex } = useDeck(screens.length);
+  const { index, setIndex, goTo, scrollMode, prefersReducedMotion, mounted, worldRef } =
+    useDeck(SCREENS.length);
+
+  const pointerRef = useRef({ x: 0, y: 0 });
+  const rootRef = useRef<HTMLDivElement>(null);
+  const parallaxFrame = useRef<number | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const screenRefs = useRef<(HTMLElement | null)[]>([]);
+  const hasTravelled = useRef(false);
+  const [initialIndex] = useState(index);
+
+  useGSAP(
+    () => {
+      const stage = stageRef.current;
+      if (scrollMode || !stage) return;
+
+      const animate = hasTravelled.current && !prefersReducedMotion;
+      hasTravelled.current = true;
+
+      gsap.to(stage, {
+        ...stageOffset(index),
+        duration: animate ? DECK_DURATION : 0,
+        ease: DECK_EASE,
+        force3D: true,
+        overwrite: "auto",
+      });
+
+      screenRefs.current.forEach((screen, i) => {
+        if (!screen) return;
+        gsap.to(screen, {
+          autoAlpha: screenOpacity(i, index),
+          filter: screenBlur(i, index),
+          duration: animate ? FADE_DURATION : 0,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      });
+    },
+    { dependencies: [index, scrollMode, prefersReducedMotion] },
+  );
+
+  const navigate = useCallback(
+    (target: number) => {
+      const clamped = Math.max(0, Math.min(target, SCREENS.length - 1));
+      if (scrollMode) {
+        document
+          .getElementById(SCREEN_IDS[clamped])
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        goTo(clamped, { immediate: true });
+      }
+    },
+    [scrollMode, goTo],
+  );
 
   useEffect(() => {
-    if (!hijackDisabled) return;
+    if (scrollMode) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [scrollMode]);
+
+  useEffect(() => {
+    if (scrollMode || prefersReducedMotion) return;
+
+    function onPointerMove(e: PointerEvent) {
+      pointerRef.current = {
+        x: e.clientX / window.innerWidth - 0.5,
+        y: e.clientY / window.innerHeight - 0.5,
+      };
+      if (parallaxFrame.current !== null) return;
+
+      parallaxFrame.current = requestAnimationFrame(() => {
+        parallaxFrame.current = null;
+        const { x, y } = pointerRef.current;
+        rootRef.current?.querySelectorAll<HTMLElement>("[data-depth]").forEach((el) => {
+          const depth = parseFloat(el.dataset.depth ?? "0");
+          el.style.translate = `${(-x * depth * 220).toFixed(1)}px ${(
+            -y * depth * 160
+          ).toFixed(1)}px`;
+        });
+      });
+    }
+
+    window.addEventListener("pointermove", onPointerMove);
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      if (parallaxFrame.current !== null) cancelAnimationFrame(parallaxFrame.current);
+    };
+  }, [scrollMode, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!scrollMode || !mounted) return;
+
+    const deepLink = readHashIndex();
+    if (deepLink > 0) {
+      document
+        .getElementById(SCREEN_IDS[deepLink])
+        ?.scrollIntoView({ behavior: "instant", block: "start" });
+    }
+
+    let ready = false;
+    const settle = setTimeout(() => {
+      ready = true;
+    }, 350);
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const targetIndex = parseInt(entry.target.id.split("-")[1], 10);
-            setIndex(targetIndex);
-          }
-        });
+        if (!ready) return;
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const target = SCREEN_IDS.indexOf(
+            entry.target.id as (typeof SCREEN_IDS)[number],
+          );
+          if (target >= 0) setIndex(target);
+        }
       },
-      {
-        threshold: 0,
-        rootMargin: "-45% 0px -45% 0px",
-      },
+      { threshold: 0, rootMargin: "-45% 0px -45% 0px" },
     );
-    for (let i = 0; i < screens.length; i++) {
-      const el = document.getElementById(`screen-${i}`);
+
+    for (const id of SCREEN_IDS) {
+      const el = document.getElementById(id);
       if (el) observer.observe(el);
     }
     return () => {
+      clearTimeout(settle);
       observer.disconnect();
     };
-  }, [hijackDisabled]);
+  }, [scrollMode, mounted, setIndex]);
 
-  if (hijackDisabled) {
-    return (
-      <div>
-        <Chrome
-          goTo={goTo}
-          index={index}
-          labels={screens.map((s) => s.label)}
-          hijackDisabled={hijackDisabled}
-        />
-        {screens.map(({ screen: Screen, label }, i) => (
-          <div
-            key={i}
-            id={`screen-${i}`}
-            style={{
-              padding: "96px 20px 110px",
-              height:
-                label === "00 HOME" || label === "06 CONTACT"
-                  ? "100vh"
-                  : "auto",
-            }}
-          >
-            <Screen />
-          </div>
-        ))}
-      </div>
-    );
-  }
+  const chrome = (
+    <Chrome
+      index={index}
+      count={SCREENS.length}
+      labels={LABELS}
+      scrollMode={scrollMode}
+      onNavigate={navigate}
+    />
+  );
 
   return (
-    <div style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
-      <Chrome
-        goTo={goTo}
-        index={index}
-        labels={screens.map((s) => s.label)}
-        hijackDisabled={hijackDisabled}
-      />
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          perspective: "1500px",
-          overflow: "hidden",
-        }}
+    <div
+      ref={rootRef}
+      className="transition-opacity duration-500"
+      style={{ opacity: mounted ? 1 : 0 }}
+    >
+      <a
+        href={`#${SCREEN_IDS[1]}`}
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:text-bg"
       >
-        {screens.map(({ screen: Screen }, i) => (
+        Skip to content
+      </a>
+
+      {mounted && (
+        <Scene
+          index={index}
+          pointerRef={pointerRef}
+          opacity={0.5}
+          reducedMotion={prefersReducedMotion}
+        />
+      )}
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-1 bg-[radial-gradient(ellipse_at_50%_42%,transparent_52%,rgba(2,3,7,0.72)_100%)]"
+      />
+
+      {chrome}
+
+      {scrollMode ? (
+        <main className="relative z-10">
+          {SCREENS.map(({ component: Screen }, i) => (
+            <section
+              key={SCREEN_IDS[i]}
+              id={SCREEN_IDS[i]}
+              className={`flex w-full items-center justify-center px-5 pb-24 pt-24 sm:px-8 ${
+                FULL_HEIGHT_IN_SCROLL.has(SCREEN_IDS[i]) ? "min-h-dvh" : ""
+              }`}
+            >
+              <Screen scrollMode goTo={navigate} />
+            </section>
+          ))}
+        </main>
+      ) : (
+        <main
+          ref={worldRef}
+          className="fixed inset-0 z-10 h-dvh overflow-hidden perspective-[1500px] perspective-origin-[50%_45%]"
+        >
           <div
-            key={i}
-            style={{
-              ...getScreenStyle(i, index),
-              position: "absolute",
-              inset: 0,
-              padding: "96px 176px 56px 200px",
-            }}
+            ref={stageRef}
+            className="absolute inset-0 transform-3d will-change-transform"
           >
-            <Screen />
+            {SCREENS.map(({ component: Screen }, i) => (
+              <section
+                key={SCREEN_IDS[i]}
+                id={SCREEN_IDS[i]}
+                ref={(el) => {
+                  screenRefs.current[i] = el;
+                }}
+                aria-hidden={i !== index}
+                className="absolute inset-0 flex items-center justify-center pb-14 pl-[clamp(96px,14vw,200px)] pr-[clamp(72px,12vw,176px)] pt-24"
+                style={{
+                  ...initialScreenStyle(i, initialIndex),
+                  pointerEvents: i === index ? "auto" : "none",
+                }}
+              >
+                <Screen scrollMode={false} goTo={navigate} />
+              </section>
+            ))}
           </div>
-        ))}
-      </div>
+        </main>
+      )}
     </div>
   );
 }

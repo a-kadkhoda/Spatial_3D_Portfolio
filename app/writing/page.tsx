@@ -1,44 +1,41 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { portfolioData } from "@/lib/data";
-import type { ScreenProps } from "@/lib/deck";
-import ScreenBody from "@/components/ui/ScreenBody";
-import SectionHeading from "@/components/ui/SectionHeading";
+import PageShell from "@/components/ui/PageShell";
 
-export default function Writing({ scrollMode }: ScreenProps) {
+export const metadata: Metadata = {
+  title: `Writing — ${portfolioData.name}`,
+  description: "Notes on front-end engineering, 3D on the web, and motion.",
+};
+
+export default function WritingPage() {
   const { writing } = portfolioData;
 
   return (
-    <ScreenBody scrollMode={scrollMode} className="max-w-220">
-      <SectionHeading
-        num="05"
-        title="Writing"
-        className="mb-2.5"
-        action={
-          <Link
-            href="/writing"
-            className="font-mono text-[11px] tracking-[1.5px] text-accent transition-opacity hover:opacity-80"
-          >
-            ALL POSTS ↗
-          </Link>
-        }
-      />
-
-      <ul>
+    <PageShell
+      num="05"
+      title="Writing"
+      intro="Notes on front-end engineering, 3D on the web, and the parts of shipping that nobody blogs about."
+    >
+      <ul className="max-w-220">
         {writing.map((post) => (
           <li
             key={post.id}
-            className="flex flex-col justify-between gap-2.5 border-b border-line px-1 py-5 sm:flex-row sm:items-center sm:gap-6"
+            id={post.id}
+            className="flex scroll-mt-24 flex-col justify-between gap-2.5 border-b border-line py-6 sm:flex-row sm:items-center sm:gap-6"
           >
             <div>
-              <h3 className="text-[17px] font-semibold text-text sm:text-[19px]">
+              <h2 className="text-[17px] font-semibold text-text sm:text-[19px]">
                 <Link
                   href={post.url}
                   className="transition-colors hover:text-accent"
                 >
                   {post.title}
                 </Link>
-              </h3>
-              <p className="mt-1.5 text-[13.5px] text-text-dim">{post.blurb}</p>
+              </h2>
+              <p className="mt-1.5 text-[13.5px] text-pretty text-text-dim">
+                {post.blurb}
+              </p>
             </div>
             <div className="flex shrink-0 items-center gap-4 sm:gap-4.5">
               <span className="font-mono text-[11px] text-text-dim">
@@ -55,6 +52,6 @@ export default function Writing({ scrollMode }: ScreenProps) {
           </li>
         ))}
       </ul>
-    </ScreenBody>
+    </PageShell>
   );
 }

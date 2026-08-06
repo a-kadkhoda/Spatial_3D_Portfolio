@@ -1,29 +1,33 @@
+import Link from "next/link";
 import { portfolioData } from "@/lib/data";
+import type { ScreenProps } from "@/lib/deck";
 import ProjectCard from "@/components/ui/ProjectCard";
+import ScreenBody from "@/components/ui/ScreenBody";
+import SectionHeading from "@/components/ui/SectionHeading";
 
-export default function Work() {
-  const { projects } = portfolioData;
+export default function Work({ scrollMode }: ScreenProps) {
+  const featured = portfolioData.projects.filter((p) => p.featured);
 
   return (
-    <section
-      id="work"
-      className="h-full flex flex-col justify-center px-8 md:px-16"
-    >
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-6">
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-sm text-accent">01</span>
-          <span className="w-11 h-px bg-white/20" />
-          <h2 className="text-xl md:text-3xl font-semibold">Selected work</h2>
-        </div>
-        <a href="#" className="font-mono text-[11px] tracking-wide text-accent">
-          ALL PROJECTS ↗
-        </a>
-      </div>
-      <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
-        {projects.map((p) => (
-          <ProjectCard key={p.id} project={p} />
+    <ScreenBody scrollMode={scrollMode}>
+      <SectionHeading
+        num="01"
+        title="Selected work"
+        action={
+          <Link
+            href="/projects"
+            className="font-mono text-[11px] tracking-[1.5px] text-accent transition-opacity hover:opacity-80"
+          >
+            ALL PROJECTS ↗
+          </Link>
+        }
+      />
+
+      <div className="grid gap-5 perspective-[1400px] sm:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
+        {featured.map((project) => (
+          <ProjectCard key={project.id} project={project} />
         ))}
       </div>
-    </section>
+    </ScreenBody>
   );
 }

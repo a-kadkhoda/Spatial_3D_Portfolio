@@ -4,22 +4,24 @@ export interface Project {
   description: string;
   tags: string[];
   year: string;
-  url: string; // internal case-study link
-  site?: string; // external live link
+  url: string;
+  site?: string;
   image?: string;
+  featured?: boolean;
 }
 
 export interface StackGroup {
-  label: string; // "FRONTEND"
-  dot: string; // hex color, e.g. "#FF6B4D"
-  items: string[]; // ["TypeScript", "Next.js", "Tailwind"]
+  label: string;
+  dot: string;
+  items: string[];
 }
 
 export interface ExperienceItem {
   id: string;
-  years: string; // "2023 — Present"
+  years: string;
   role: string;
   blurb: string;
+  current?: boolean;
 }
 
 export interface WritingItem {
@@ -31,29 +33,29 @@ export interface WritingItem {
 }
 
 export interface SocialLink {
-  label: string; // "GITHUB"
+  label: string;
   url: string;
 }
 
 export interface PortfolioData {
   name: string;
   role: string;
-  bio: string; // short — Hero
-  aboutText: string; // longer — About
+  kicker: string;
+  bio: string;
+  aboutParagraphs: [string, string];
+  heroChips: string[];
   projects: Project[];
   stack: StackGroup[];
   experience: ExperienceItem[];
   writing: WritingItem[];
   socials: SocialLink[];
   email: string;
-  kicker: string;
-  contactHeadline: string; // "Let's build something with"
-  contactHighlight: string; // "depth" — the gradient-highlighted word
-  contactSubtext: string;
-  resumeUrl: string;
-  // replace aboutText with:
-  aboutParagraphs: [string, string]; // two paragraphs, different sizes
+  availability: string;
   location: string;
   focus: string;
-  status: string; // "Open to work"
+  status: string;
+  contactHeadline: string;
+  contactHighlight: string;
+  contactSubtext: string;
+  resumeUrl: string;
 }

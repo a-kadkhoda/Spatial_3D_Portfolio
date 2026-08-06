@@ -1,117 +1,131 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import { portfolioData } from "@/lib/data";
+
 interface ChromeProps {
   index: number;
-  goTo: (target: number) => void;
+  count: number;
   labels: string[];
-  hijackDisabled: boolean;
+  scrollMode: boolean;
+  onNavigate: (target: number) => void;
 }
 
 export default function Chrome({
   index,
-  goTo,
+  count,
   labels,
-  hijackDisabled,
+  scrollMode,
+  onNavigate,
 }: ChromeProps) {
-  const railStyle: React.CSSProperties = hijackDisabled
-    ? {
-        position: "fixed",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 60,
-        display: "flex",
-        flexDirection: "row",
-        gap: 14,
-        padding: "14px 16px calc(14px + env(safe-area-inset-bottom))",
-        justifyContent: "start",
-        overflowX: "auto",
-        background: "rgba(5, 6, 12, 0.85)",
-        backdropFilter: "blur(12px)",
-        borderTop: "1px solid rgba(255,255,255,0.08)",
-      }
-    : {
-        position: "fixed",
-        left: 32,
-        top: "50%",
-        transform: "translateY(-50%)",
-        zIndex: 60,
-        display: "flex",
-        flexDirection: "column",
-        gap: 18,
-      };
+  const { email, resumeUrl, availability } = portfolioData;
+  const railRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!scrollMode) return;
+    const rail = railRef.current;
+    const active = rail?.querySelector<HTMLElement>('[aria-current="true"]');
+    if (!rail || !active) return;
+
+    const target = active.offsetLeft - (rail.clientWidth - active.offsetWidth) / 2;
+    rail.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [index, scrollMode]);
 
   return (
     <>
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 60,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "calc(22px + env(safe-area-inset-top)) 32px 22px",
-        }}
-      >
+      <header className="fixed inset-x-0 top-0 z-60 flex items-center justify-between gap-3 px-5 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] sm:px-8 sm:pb-5 sm:pt-[calc(1.375rem+env(safe-area-inset-top))]">
         <button
-          onClick={() => goTo(0)}
-          className="font-mono text-sm tracking-[2px] text-text"
+          type="button"
+          onClick={() => onNavigate(0)}
+          className="cursor-pointer font-mono text-sm tracking-[2px] text-text transition-colors hover:text-accent"
         >
           AK<span className="text-accent">∴</span>
         </button>
 
-        <div className="flex items-center gap-5">
-          <span className="hidden md:flex items-center gap-2 font-mono text-[11px] tracking-[2px] text-text-muted">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-[pulse_2.2s_ease-in-out_infinite]" />
-            OPEN TO WORK
+        <div className="flex items-center gap-3 sm:gap-5">
+          <span className="hidden items-center gap-2 font-mono text-[11px] tracking-[2px] text-text-muted xl:flex">
+            <span className="size-1.75 shrink-0 rounded-full bg-accent animate-pulse-dot" />
+            {availability}
           </span>
 
           <a
-            href="#"
-            className="hidden md:block font-mono text-[11px] tracking-[2px] text-text-muted border border-white/20 px-4 py-2 rounded-full"
+            href={resumeUrl}
+            className="hidden rounded-full border border-line-strong px-4 py-2 font-mono text-[11px] tracking-[2px] text-text-muted transition-colors hover:border-accent hover:text-accent sm:block"
           >
             CV ↓
           </a>
 
           <a
-            href="mailto:aliakbarkadkhoda@proton.me"
-            className="font-mono text-[11px] tracking-[2px] font-medium text-bg bg-accent px-4.5 py-2 rounded-full"
+            href={`mailto:${email}`}
+            className="rounded-full bg-accent px-4 py-2 font-mono text-[10px] font-medium tracking-[1.5px] text-bg transition-[filter,transform] hover:brightness-110 sm:px-4.5 sm:text-[11px] sm:tracking-[2px]"
           >
             EMAIL ME
           </a>
         </div>
-      </div>
+      </header>
 
-      <div style={railStyle} className="no-scrollbar">
+      <nav
+        ref={railRef}
+        aria-label="Sections"
+        className={
+          scrollMode
+            ? "no-scrollbar fixed inset-x-0 bottom-0 z-60 flex flex-row gap-4 overflow-x-auto border-t border-line bg-bg/85 px-4 pb-[calc(0.875rem+env(safe-area-inset-bottom))] pt-3.5 backdrop-blur-xl"
+            :
+              "fixed left-7.5 top-1/2 z-60 flex -translate-y-1/2 flex-col gap-3.75"
+        }
+      >
         {labels.map((label, i) => {
           const isActive = i === index;
           return (
             <button
               key={label}
-              onClick={() => {
-                if (hijackDisabled) {
-                  document
-                    .getElementById(`screen-${i}`)
-                    ?.scrollIntoView({ behavior: "smooth" });
-                } else {
-                  goTo(i);
-                }
-              }}
-              className={`shrink-0 flex items-center gap-2 font-mono text-[10px] md:text-[11px] tracking-[1.5px] md:tracking-[2px] ${
-                isActive ? "text-accent" : "text-text-muted"
+              type="button"
+              onClick={() => onNavigate(i)}
+              aria-current={isActive ? "true" : undefined}
+              className={`flex shrink-0 cursor-pointer items-center gap-2.5 whitespace-nowrap font-mono text-[10px] tracking-[1.5px] transition-colors duration-400 sm:text-[11px] sm:tracking-[2px] ${
+                isActive ? "text-accent" : "text-text-dim hover:text-text"
               }`}
             >
               <span
-                className={`w-2 h-px ${isActive ? "bg-accent" : "bg-text-muted"}`}
+                aria-hidden="true"
+                className={`h-px transition-all duration-400 ${
+                  isActive ? "w-7.5 bg-accent" : "w-3 bg-text-dim"
+                }`}
               />
               {label}
             </button>
           );
         })}
-      </div>
+      </nav>
+
+      {!scrollMode && (
+        <div className="fixed bottom-6.5 right-7.5 z-60 flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => onNavigate(index - 1)}
+            disabled={index === 0}
+            aria-label="Previous section"
+            className="grid size-10 cursor-pointer place-items-center rounded-full border border-line-strong bg-surface/55 text-base leading-none text-text-muted transition-colors hover:border-accent hover:text-accent disabled:cursor-default disabled:opacity-30 disabled:hover:border-line-strong disabled:hover:text-text-muted"
+          >
+            ‹
+          </button>
+          <span
+            aria-hidden="true"
+            className="font-mono text-xs tracking-[2px] text-text-dim tabular-nums"
+          >
+            {String(index).padStart(2, "0")} / {String(count - 1).padStart(2, "0")}
+          </span>
+          <button
+            type="button"
+            onClick={() => onNavigate(index + 1)}
+            disabled={index === count - 1}
+            aria-label="Next section"
+            className="grid size-10 cursor-pointer place-items-center rounded-full border border-line-strong bg-surface/55 text-base leading-none text-text-muted transition-colors hover:border-accent hover:text-accent disabled:cursor-default disabled:opacity-30 disabled:hover:border-line-strong disabled:hover:text-text-muted"
+          >
+            ›
+          </button>
+        </div>
+      )}
     </>
   );
 }

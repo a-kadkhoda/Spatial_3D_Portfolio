@@ -1,54 +1,65 @@
+import Image from "next/image";
 import { portfolioData } from "@/lib/data";
+import type { ScreenProps } from "@/lib/deck";
+import ScreenBody from "@/components/ui/ScreenBody";
+import SectionHeading from "@/components/ui/SectionHeading";
 
-export default function About() {
+const PORTRAIT = "/images/portrait.jpg";
+const HAS_PORTRAIT = false;
+
+export default function About({ scrollMode }: ScreenProps) {
   const { aboutParagraphs, location, focus, status } = portfolioData;
+  const [lead, detail] = aboutParagraphs;
 
   return (
-    <section
-      id="about"
-      className="h-full flex flex-col justify-center px-8 md:px-16"
-    >
-      <div className="flex items-center gap-4 mb-8">
-        <span className="font-mono text-sm text-accent">04</span>
-        <span className="w-11 h-px bg-white/20" />
-        <h2 className="text-xl md:text-3xl font-semibold">About</h2>
-      </div>
+    <ScreenBody scrollMode={scrollMode} className="max-w-260">
+      <SectionHeading num="04" title="About" className="mb-8 sm:mb-8.5" />
 
-      <div className="grid gap-11 items-center grid-cols-1 md:grid-cols-[340px_1fr]">
-        <div className="h-100 max-w-85 w-full mx-auto rounded-[18px] bg-white/5 flex items-center justify-center text-xs text-text-muted">
-          Portrait
+      <div className="grid items-center gap-8 sm:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] sm:gap-11">
+        <div className="relative mx-auto h-70 w-full max-w-85 overflow-hidden rounded-[18px] border border-line bg-white/4 sm:h-100">
+          {HAS_PORTRAIT ? (
+            <Image
+              src={PORTRAIT}
+              alt="Portrait of Aliakbar Kadkhoda"
+              fill
+              sizes="(max-width: 900px) 100vw, 340px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="grid h-full place-items-center font-mono text-[11px] tracking-[2px] text-text-dim">
+              PORTRAIT
+            </div>
+          )}
         </div>
 
         <div>
-          <p className="text-[17px] leading-relaxed text-text/85">
-            {aboutParagraphs[0]}
+          <p className="text-base leading-relaxed text-pretty text-text-muted sm:text-[17px]">
+            {lead}
           </p>
-          <p className="mt-4 text-[15px] leading-relaxed text-text-muted/90">
-            {aboutParagraphs[1]}
+          <p className="mt-4 text-sm leading-relaxed text-pretty text-text-dim sm:text-[15px]">
+            {detail}
           </p>
 
-          <div className="flex gap-11 mt-7.5 pt-6 border-t border-white/10">
-            <div>
-              <div className="font-mono text-[10.5px] tracking-[2px] text-text-muted/60 mb-1.5">
-                LOCATION
+          <dl className="mt-7 flex flex-wrap gap-x-8 gap-y-5 border-t border-line pt-6">
+            {[
+              { term: "LOCATION", value: location, accent: false },
+              { term: "FOCUS", value: focus, accent: false },
+              { term: "STATUS", value: status, accent: true },
+            ].map(({ term, value, accent }) => (
+              <div key={term}>
+                <dt className="mb-1.5 font-mono text-[10.5px] tracking-[2px] text-text-dim">
+                  {term}
+                </dt>
+                <dd
+                  className={`text-[15px] ${accent ? "text-accent" : "text-text"}`}
+                >
+                  {value}
+                </dd>
               </div>
-              <div className="text-[15px]">{location}</div>
-            </div>
-            <div>
-              <div className="font-mono text-[10.5px] tracking-[2px] text-text-muted/60 mb-1.5">
-                FOCUS
-              </div>
-              <div className="text-[15px]">{focus}</div>
-            </div>
-            <div>
-              <div className="font-mono text-[10.5px] tracking-[2px] text-text-muted/60 mb-1.5">
-                STATUS
-              </div>
-              <div className="text-[15px] text-accent">{status}</div>
-            </div>
-          </div>
+            ))}
+          </dl>
         </div>
       </div>
-    </section>
+    </ScreenBody>
   );
 }

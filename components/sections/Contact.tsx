@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { portfolioData } from "@/lib/data";
+import type { ScreenProps } from "@/lib/deck";
 
-export default function Contact() {
+export default function Contact({ scrollMode }: ScreenProps) {
   const {
     email,
     socials,
@@ -12,56 +14,63 @@ export default function Contact() {
   } = portfolioData;
 
   return (
-    <section
-      id="contact"
-      className="h-full flex flex-col items-center justify-center text-center px-0 md:px-8"
+    <div
+      className={`flex w-full items-center justify-center ${scrollMode ? "" : "h-full"}`}
     >
-      <p className="font-mono text-xs tracking-[3px] text-accent mb-5">
-        06 — CONTACT
-      </p>
+      <div className="max-w-200 text-center">
+        <p className="mb-5 font-mono text-[11px] tracking-[3px] text-accent sm:text-xs">
+          06 — CONTACT
+        </p>
 
-      <h2 className="text-5xl md:text-6xl font-semibold tracking-tight leading-tight max-w-2xl">
-        {contactHeadline}{" "}
-        <span className="bg-linear-to-r from-accent to-accent2 bg-clip-text text-transparent">
-          {contactHighlight}
-        </span>
-        .
-      </h2>
+        <h2 className="text-contact font-display font-semibold leading-[1.04] tracking-[-0.02em] text-pretty text-text">
+          {contactHeadline}{" "}
+          <span className="bg-linear-to-r from-accent to-accent2 bg-clip-text text-transparent">
+            {contactHighlight}
+          </span>
+          .
+        </h2>
 
-      <p className="max-w-md mt-5 text-text-muted">{contactSubtext}</p>
+        <p className="mx-auto mt-5 max-w-120 text-[15px] leading-relaxed text-pretty text-text-muted sm:text-base">
+          {contactSubtext}
+        </p>
 
-      <a
-        href={`mailto:${email}`}
-        className="mt-8 bg-accent text-bg font-semibold text-sm px-7 py-3.5 rounded-full"
-      >
-        {email}
-      </a>
-
-      <div className="flex gap-6 mt-8 flex-wrap justify-center">
-        {socials.map((s) => (
+        <div className="mt-8 flex justify-center">
           <a
-            key={s.label}
-            href={s.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-xs tracking-wide text-text-muted"
+            href={`mailto:${email}`}
+            className="rounded-full bg-accent px-6 py-3.5 font-display text-sm font-semibold text-bg shadow-[0_10px_34px_color-mix(in_oklab,var(--color-accent)_35%,transparent)] transition-transform hover:-translate-y-0.5 hover:brightness-110 sm:px-7.5 sm:text-[15px]"
           >
-            {s.label} ↗
+            {email}
           </a>
-        ))}
-        <a
-          href={resumeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-mono text-xs tracking-wide text-accent"
-        >
-          RÉSUMÉ / CV ↓
-        </a>
-      </div>
+        </div>
 
-      <p className="font-mono text-[10.5px] tracking-widest text-text-muted/50 mt-14">
-        © 2026 {name.toUpperCase()} · BUILT IN THE BROWSER
-      </p>
-    </section>
+        <nav
+          aria-label="Elsewhere"
+          className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3"
+        >
+          {socials.map((social) => (
+            <a
+              key={social.label}
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[11px] tracking-[1.5px] text-text-muted transition-colors hover:text-accent"
+            >
+              {social.label} ↗
+            </a>
+          ))}
+          <Link
+            href={resumeUrl}
+            className="font-mono text-[11px] tracking-[1.5px] text-accent transition-opacity hover:opacity-80"
+          >
+            RÉSUMÉ / CV ↓
+          </Link>
+        </nav>
+
+        <p className="mt-14 font-mono text-[10.5px] tracking-[2px] text-text-dim/60">
+          © {new Date().getFullYear()} {name.toUpperCase()} · BUILT IN THE
+          BROWSER
+        </p>
+      </div>
+    </div>
   );
 }
