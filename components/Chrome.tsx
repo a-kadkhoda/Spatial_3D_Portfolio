@@ -24,7 +24,7 @@ export default function Chrome({
         flexDirection: "row",
         gap: 14,
         padding: "14px 16px calc(14px + env(safe-area-inset-bottom))",
-        justifyContent: "center",
+        justifyContent: "start",
         overflowX: "auto",
         background: "rgba(5, 6, 12, 0.85)",
         backdropFilter: "blur(12px)",
