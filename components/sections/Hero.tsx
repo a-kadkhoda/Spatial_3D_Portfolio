@@ -7,7 +7,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="h-full flex flex-col items-center justify-center text-center px-8 overflow-y-auto no-scrollbar"
+      className="h-full flex flex-col items-center justify-center text-center px-0 md:px-8"
     >
       <p className="font-mono text-xs tracking-[1.5px] md:tracking-[3px] text-accent mb-6">
         {kicker}

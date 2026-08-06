@@ -21,7 +21,7 @@ export default function Writing() {
           {writing.map((w) => (
             <div
               key={w.id}
-              className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-6 py-5 border-b border-white/[0.09]"
+              className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-6 py-5 border-b border-white/9"
             >
               <div>
                 <div className="text-lg font-semibold">{w.title}</div>
