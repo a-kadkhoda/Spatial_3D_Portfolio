@@ -6,7 +6,7 @@ export default function Writing() {
   return (
     <section
       id="writing"
-      className="h-full flex flex-col justify-center px-8 md:px-16"
+      className="h-full flex flex-col  px-8 md:px-16 overflow-y-auto no-scrollbar"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-4">

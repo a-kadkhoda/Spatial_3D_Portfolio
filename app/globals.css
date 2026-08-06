@@ -18,6 +18,15 @@ body {
   font-family: var(--font-sans), sans-serif;
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes pulse {
   0%,
   100% {

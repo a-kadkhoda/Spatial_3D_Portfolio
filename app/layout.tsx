@@ -34,6 +34,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${sora.variable} ${plexMono.variable} ${spaceGrotesk.variable} antialiased`}
+      suppressHydrationWarning
     >
       <body>{children}</body>
     </html>

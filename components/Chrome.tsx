@@ -13,11 +13,39 @@ export default function Chrome({
   labels,
   hijackDisabled,
 }: ChromeProps) {
+  const railStyle: React.CSSProperties = hijackDisabled
+    ? {
+        position: "fixed",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 60,
+        display: "flex",
+        flexDirection: "row",
+        gap: 14,
+        padding: "14px 16px calc(14px + env(safe-area-inset-bottom))",
+        justifyContent: "center",
+        overflowX: "auto",
+        background: "rgba(5, 6, 12, 0.85)",
+        backdropFilter: "blur(12px)",
+        borderTop: "1px solid rgba(255,255,255,0.08)",
+      }
+    : {
+        position: "fixed",
+        left: 32,
+        top: "50%",
+        transform: "translateY(-50%)",
+        zIndex: 60,
+        display: "flex",
+        flexDirection: "column",
+        gap: 18,
+      };
+
   return (
     <>
       <div
         style={{
-          position: "absolute",
+          position: "fixed",
           top: 0,
           left: 0,
           right: 0,
@@ -36,14 +64,14 @@ export default function Chrome({
         </button>
 
         <div className="flex items-center gap-5">
-          <span className="flex items-center gap-2 font-mono text-[11px] tracking-[2px] text-text-muted">
+          <span className="hidden md:flex items-center gap-2 font-mono text-[11px] tracking-[2px] text-text-muted">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-[pulse_2.2s_ease-in-out_infinite]" />
             OPEN TO WORK
           </span>
 
           <a
             href="#"
-            className="font-mono text-[11px] tracking-[2px] text-text-muted border border-white/20 px-4 py-2 rounded-full"
+            className="hidden md:block font-mono text-[11px] tracking-[2px] text-text-muted border border-white/20 px-4 py-2 rounded-full"
           >
             CV ↓
           </a>
@@ -57,19 +85,7 @@ export default function Chrome({
         </div>
       </div>
 
-      {/* nav rail */}
-      <div
-        style={{
-          position: "absolute",
-          left: 32,
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 60,
-          display: "flex",
-          flexDirection: "column",
-          gap: 18,
-        }}
-      >
+      <div style={railStyle} className="no-scrollbar">
         {labels.map((label, i) => {
           const isActive = i === index;
           return (
@@ -78,18 +94,19 @@ export default function Chrome({
               onClick={() => {
                 if (hijackDisabled) {
                   document
-                    .getElementById(`screen-${index}`)
+                    .getElementById(`screen-${i}`)
                     ?.scrollIntoView({ behavior: "smooth" });
                 } else {
                   goTo(i);
                 }
               }}
-              className={`flex items-center gap-2.5 font-mono text-[11px] tracking-[2px] ${isActive ? "text-accent" : "text-text-muted"}`}
+              className={`shrink-0 flex items-center gap-2 font-mono text-[10px] md:text-[11px] tracking-[1.5px] md:tracking-[2px] ${
+                isActive ? "text-accent" : "text-text-muted"
+              }`}
             >
               <span
                 className={`w-2 h-px ${isActive ? "bg-accent" : "bg-text-muted"}`}
               />
-
               {label}
             </button>
           );

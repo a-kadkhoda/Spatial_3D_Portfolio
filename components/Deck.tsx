@@ -10,6 +10,7 @@ import Writing from "@/components/sections/Writing";
 import Contact from "@/components/sections/Contact";
 import { getScreenStyle } from "@/lib/screenStyle";
 import Chrome from "./Chrome";
+import { useEffect } from "react";
 
 const screens = [
   { screen: Hero, label: "00 HOME" },
@@ -22,7 +23,33 @@ const screens = [
 ];
 
 export default function Deck() {
-  const { index, goTo, hijackDisabled } = useDeck(screens.length);
+  const { index, goTo, hijackDisabled, setIndex } = useDeck(screens.length);
+
+  useEffect(() => {
+    if (!hijackDisabled) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const targetIndex = parseInt(entry.target.id.split("-")[1], 10);
+            setIndex(targetIndex);
+          }
+        });
+      },
+      {
+        threshold: 0,
+        rootMargin: "-45% 0px -45% 0px",
+      },
+    );
+    for (let i = 0; i < screens.length; i++) {
+      const el = document.getElementById(`screen-${i}`);
+      if (el) observer.observe(el);
+    }
+    return () => {
+      observer.disconnect();
+    };
+  }, [hijackDisabled]);
 
   if (hijackDisabled) {
     return (
@@ -34,7 +61,11 @@ export default function Deck() {
           hijackDisabled={hijackDisabled}
         />
         {screens.map(({ screen: Screen }, i) => (
-          <div key={i} id={`screen-${i}`}>
+          <div
+            key={i}
+            id={`screen-${i}`}
+            style={{ padding: "96px 20px 110px", height: "100vh" }}
+          >
             <Screen />
           </div>
         ))}

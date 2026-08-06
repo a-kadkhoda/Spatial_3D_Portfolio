@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useSyncExternalStore } from "react";
 
 function isEditableTarget(target: EventTarget | null): boolean {
   if (target instanceof HTMLElement) {
@@ -14,18 +14,34 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return false;
 }
 
+function subscribeToMediaQuery(query: string) {
+  return (callback: () => void) => {
+    const mql = window.matchMedia(query);
+    mql.addEventListener("change", callback);
+    return () => mql.removeEventListener("change", callback);
+  };
+}
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+const MOBILE_QUERY = "(max-width: 768px)";
+
 export function useDeck(screenCount: number) {
   const [index, setIndex] = useState(0);
   const isLocked = useRef(false);
   const LOCK_MS = 900;
   const touchStartY = useRef(0);
-  const prefersReducedMotion =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const isMobile =
-    typeof window !== "undefined" &&
-    window.matchMedia("(max-width: 768px)").matches;
+  const prefersReducedMotion = useSyncExternalStore(
+    subscribeToMediaQuery(REDUCED_MOTION_QUERY),
+    () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
+    () => false,
+  );
+
+  const isMobile = useSyncExternalStore(
+    subscribeToMediaQuery(MOBILE_QUERY),
+    () => window.matchMedia(MOBILE_QUERY).matches,
+    () => false,
+  );
 
   const hijackDisabled = prefersReducedMotion || isMobile;
 
@@ -121,5 +137,5 @@ export function useDeck(screenCount: number) {
     };
   }, [index, hijackDisabled]);
 
-  return { index, goTo, hijackDisabled };
+  return { index, goTo, hijackDisabled, setIndex };
 }

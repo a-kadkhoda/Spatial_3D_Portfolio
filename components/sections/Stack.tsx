@@ -6,7 +6,7 @@ export default function Stack() {
   return (
     <section
       id="stack"
-      className="h-full flex flex-col justify-center px-8 md:px-16"
+      className="h-full flex flex-col justify-center px-8 md:px-16 overflow-y-auto no-scrollbar"
     >
       <div className="flex items-center gap-4 mb-6">
         <span className="font-mono text-sm text-accent">02</span>

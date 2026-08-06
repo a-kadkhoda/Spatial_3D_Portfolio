@@ -6,7 +6,7 @@ export default function Experience() {
   return (
     <section
       id="experience"
-      className="h-full flex flex-col justify-center px-8 md:px-16"
+      className="h-full flex flex-col px-8 md:px-16 overflow-y-auto no-scrollbar"
     >
       <div className="flex items-center gap-4 mb-7">
         <span className="font-mono text-sm text-accent">03</span>
